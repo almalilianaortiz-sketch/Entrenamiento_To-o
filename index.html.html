@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Entrenamiento de Toño</title>
+<style>
+:root{--vino:#6f243d;--vino2:#8b3652;--crema:#f7f2ed;--cafe:#4b3a34;--gris:#6d6764;--verde:#44735a;--rojo:#9b3f46;--card:#fff;--line:#e7ddd6}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--crema);color:#2c2927}
+header{background:linear-gradient(135deg,var(--vino),#4d172b);color:white;padding:24px 18px 18px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px #0002}
+header h1{margin:0;font-size:1.45rem} header p{margin:5px 0 0;opacity:.9;font-size:.9rem}
+.wrap{max-width:900px;margin:auto;padding:14px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:white;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}.stat b{display:block;color:var(--vino);font-size:1.1rem}.stat span{font-size:.75rem;color:var(--gris)}
+.progress{height:10px;background:#e7ddd6;border-radius:20px;overflow:hidden}.progress>div{height:100%;background:var(--verde);width:0;transition:.2s}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}.tabs button,.pill{white-space:nowrap;border:1px solid var(--line);background:white;padding:9px 12px;border-radius:999px;font-weight:700;color:var(--cafe)}
+.tabs button.active{background:var(--vino);color:#fff;border-color:var(--vino)}
+.toolbar{display:flex;gap:8px;margin-bottom:12px}.toolbar input{flex:1;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}.toolbar button,.btn{border:0;border-radius:12px;padding:10px 13px;font-weight:750;cursor:pointer}
+.btn-main{background:var(--vino);color:#fff}.btn-soft{background:#eee4de;color:var(--vino)}.btn-green{background:var(--verde);color:white}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;margin:0 0 12px;box-shadow:0 2px 9px #3a27200b}
+.card.done{opacity:.68;border-color:#9fc4ac}.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.top h2{font-size:1.12rem;margin:0 0 4px}.meta{font-size:.85rem;color:var(--gris)}
+.badge{font-size:.72rem;font-weight:800;background:#f1e2e8;color:var(--vino);padding:5px 8px;border-radius:999px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.box{background:#faf7f4;border-radius:12px;padding:10px}.box h3{font-size:.88rem;margin:0 0 7px;color:var(--vino)} ol,ul{margin:5px 0;padding-left:20px} li{margin:4px 0;font-size:.87rem;line-height:1.35}
+.sets{margin-top:12px;overflow-x:auto}.setrow{display:grid;grid-template-columns:44px 1fr 1fr 1fr;gap:7px;align-items:center;margin:7px 0}.setrow input{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px}.setrow label{font-size:.75rem;color:var(--gris)}
+.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.note{font-size:.82rem;color:var(--gris);line-height:1.4}
+.timer{position:fixed;right:15px;bottom:15px;background:#251d1a;color:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 5px 22px #0004;z-index:10}.timer b{font-size:1.15rem;margin-right:8px}
+.sectionTitle{margin:18px 2px 10px;color:var(--vino)}
+.runbox{background:#fff8ef;border:1px solid #efd8b9;border-radius:14px;padding:12px;margin-top:10px}
+footer{text-align:center;color:var(--gris);font-size:.75rem;padding:25px 8px 80px}
+@media(max-width:650px){.summary{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.setrow{grid-template-columns:38px 1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<header><h1>Entrenamiento de Toño · V2</h1><p>Recomposición corporal · fuerza + carrera progresiva · semanas 1–4 · progreso + nutrición + récords</p></header>
+<div class="wrap">
+  <div class="summary">
+    <div class="stat"><b>84.0 kg</b><span>peso inicial</span></div>
+    <div class="stat"><b>29.6%</b><span>grasa estimada</span></div>
+    <div class="stat"><b>32.1 kg</b><span>masa muscular</span></div>
+    <div class="stat"><b>1,800</b><span>kcal iniciales</span></div>
+  </div>
+  <div class="card"><div class="top"><div><b>Progreso del día</b><div class="note" id="progressText">0 de 0 ejercicios</div></div><span class="badge" id="pct">0%</span></div><div class="progress"><div id="bar"></div></div></div>
+  <div class="tabs" id="mainTabs">
+<button class="active" onclick="showSection('train',this)">🏋️ Entrenamiento</button>
+<button onclick="showSection('body',this)">📊 Progreso</button>
+<button onclick="showSection('nutrition',this)">🍽️ Nutrición</button>
+<button onclick="showSection('records',this)">🏆 Récords</button>
+</div>
+<section id="trainSection">
+<div class="tabs" id="tabs"></div>
+  <div class="toolbar"><input id="search" placeholder="Buscar ejercicio…"><button class="btn btn-soft" onclick="resetDay()">Reiniciar día</button></div>
+  <div id="content"></div>
+</section>
+
+<section id="bodySection" style="display:none">
+ <div class="card">
+  <h2 class="sectionTitle">Registro corporal</h2>
+  <div class="grid">
+   <div class="box"><h3>Peso (kg)</h3><input id="bodyWeight" type="number" step=".1" placeholder="84.0" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></div>
+   <div class="box"><h3>Cintura (cm)</h3><input id="waist" type="number" step=".1" placeholder="Ej. 100" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></div>
+  </div>
+  <div class="grid">
+   <div class="box"><h3>Fecha</h3><input id="measureDate" type="date" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></div>
+   <div class="box"><h3>Tipo de día</h3><select id="activityDay" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"><option>Sedentario</option><option>Trabajo físico</option><option>Entrenamiento</option><option>Trabajo físico + entrenamiento</option></select></div>
+  </div>
+  <div class="actions"><button class="btn btn-main" onclick="addMeasure()">Guardar medición</button></div>
+ </div>
+ <div class="card"><h2>Historial</h2><div id="measureHistory" class="note"></div></div>
+ <div class="card"><h2>Cambio desde el inicio</h2><div id="bodySummary" class="summary"></div><p class="note">Usa la tendencia de varias semanas. Las variaciones diarias de agua no representan cambios equivalentes de grasa.</p></div>
+</section>
+
+<section id="nutritionSection" style="display:none">
+ <div class="card">
+  <h2>Objetivos diarios iniciales</h2>
+  <div class="summary"><div class="stat"><b>1,800</b><span>kcal</span></div><div class="stat"><b>125 g</b><span>proteína</span></div><div class="stat"><b>25–30 g</b><span>fibra</span></div><div class="stat"><b>0</b><span>bebidas azucaradas ideal</span></div></div>
+  <p class="note">Objetivos iniciales sujetos a ajuste según peso, cintura, hambre, rendimiento y actividad física.</p>
+ </div>
+ <div class="card"><h2>Checklist de hoy</h2>
+  <div id="foodChecks"></div>
+  <div class="box" style="margin-top:10px"><h3>Hambre del día (1–10)</h3><input id="hunger" type="range" min="1" max="10" value="5" oninput="saveNutrition()"><span id="hungerVal">5</span></div>
+ </div>
+ <div class="card"><h2>Equivalencias rápidas</h2>
+  <ul><li>Proteína principal: 160–180 g de pollo/carne/pescado.</li><li>Tortillas: 3 como porción habitual de una comida.</li><li>Arroz/pasta cocidos: ¾–1 taza.</li><li>Frijoles: ~½ taza.</li><li>Aguacate: 40–60 g.</li><li>Avena: 40–50 g.</li></ul>
+ </div>
+ <div class="card"><h2>Comidas que sí caben</h2><p class="note"><b>Tacos:</b> ~4 bien servidos. <b>Hamburguesa:</b> 150–160 g de carne y controlar extras. <b>Pizza:</b> 2–3 rebanadas según tamaño y acompañamientos. <b>Torta:</b> priorizar 150 g aprox. de proteína y moderar extras densos en calorías.</p></div>
+</section>
+
+<section id="recordsSection" style="display:none">
+ <div class="card"><h2>Récords personales</h2>
+  <div class="grid">
+   <div class="box"><h3>Lagartijas seguidas</h3><input id="prPush" type="number" min="0" placeholder="0" oninput="savePR()" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></div>
+   <div class="box"><h3>Sentadillas seguidas</h3><input id="prSquat" type="number" min="0" placeholder="0" oninput="savePR()" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></div>
+   <div class="box"><h3>Carrera continua (min)</h3><input id="prRun" type="number" min="0" step=".5" placeholder="0" oninput="savePR()" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></div>
+   <div class="box"><h3>Distancia (km)</h3><input id="prKm" type="number" min="0" step=".1" placeholder="0" oninput="savePR()" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px"></div>
+  </div>
+ </div>
+ <div class="card"><h2>Objetivos de la primera etapa</h2><ul><li>10–15 lagartijas completas con técnica sólida.</li><li>15–20 sentadillas controladas.</li><li>Completar las 4 semanas de carrera/caminata sin dolor articular.</li><li>Reducir cintura mientras mantiene o mejora el rendimiento.</li></ul></div>
+</section>
+
+  <footer>Los datos de básculas de bioimpedancia son estimaciones. Detén el ejercicio ante dolor torácico, desmayo, falta de aire desproporcionada o síntomas intensos. No modifica medicamentos.</footer>
+</div>
+<div class="timer"><b id="clock">02:00</b><button class="btn btn-main" onclick="startTimer()">Descanso</button></div>
+
+<script>
+const days = {
+"Lunes · Fuerza A":[
+ {n:"Sentadilla con peso corporal",sr:"3 × 8–12",rir:"RIR 2–3",c:["Pies aproximadamente al ancho de hombros.","Mantén el pie completo apoyado y rodillas siguiendo la dirección de los dedos.","Desciende llevando cadera atrás y abajo sin perder control.","Mantén abdomen firme y espalda neutra.","Sube empujando el suelo; termina erguido sin hiperextender la espalda."],e:["Talones se levantan → reduce profundidad y trabaja movilidad.","Rodillas colapsan hacia dentro → alínealas con los dedos.","Caer rápido al fondo → usa un descenso controlado de 2–3 s."],alt:"Sentadilla a una silla o caja.",v:"https://www.youtube.com/results?search_query=bodyweight+squat+proper+form"},
+ {n:"Lagartijas",sr:"3 × 6–12",rir:"RIR 2–3",c:["Manos ligeramente más anchas que hombros.","Cuerpo en línea desde cabeza hasta talones.","Aprieta abdomen y glúteos.","Baja el pecho de forma controlada con codos ~30–60° del torso.","Empuja el suelo manteniendo todo el cuerpo como una unidad."],e:["Cadera cae → contrae abdomen/glúteos o usa variante inclinada.","Codos totalmente abiertos → llévalos ligeramente hacia atrás.","Recorrido muy corto → usa una inclinación que permita amplitud completa."],alt:"Lagartija inclinada en mesa/banca/pared.",v:"https://www.youtube.com/results?search_query=push+up+proper+form"},
+ {n:"Remo con banda",sr:"3 × 10–15",rir:"RIR 2–3",c:["Ancla la banda de forma segura.","Pecho alto y columna neutra.","Inicia llevando hombros suavemente atrás.","Tira de los codos hacia atrás sin encoger hombros.","Regresa lento hasta extender los brazos."],e:["Encoger hombros → aléjalos de las orejas.","Impulsarse con el tronco → baja resistencia.","Soltar rápido → controla la fase de regreso."],alt:"Remo con mochila resistente.",v:"https://www.youtube.com/results?search_query=resistance+band+row+proper+form"},
+ {n:"Puente de glúteos",sr:"3 × 12–15",rir:"RIR 2–3",c:["Pies apoyados y rodillas flexionadas.","Mantén costillas y abdomen controlados.","Empuja con los pies y eleva la cadera.","Contrae glúteos arriba sin arquear la espalda.","Desciende lentamente."],e:["Arquear zona lumbar → termina con glúteos, no con espalda.","Pies demasiado lejos → acércalos.","Rodillas se abren/cierran → mantenlas alineadas."],alt:"Hip thrust apoyado en sofá.",v:"https://www.youtube.com/results?search_query=glute+bridge+proper+form"},
+ {n:"Plancha",sr:"3 × 20–40 s",rir:"Técnica limpia",c:["Codos debajo de hombros.","Cabeza, tronco y piernas alineados.","Aprieta abdomen y glúteos.","Respira sin perder tensión.","Termina la serie antes de que se hunda la cadera."],e:["Cadera baja → acorta la serie.","Cadera muy alta → busca línea recta.","Aguantar la respiración → respira de forma continua."],alt:"Plancha con rodillas apoyadas.",v:"https://www.youtube.com/results?search_query=plank+proper+form"}
+],
+"Martes · Correr":[{run:true,n:"Carrera / caminata",sr:"30–35 min",rir:"Ritmo conversacional"}],
+"Miércoles · Fuerza B":[],
+"Jueves · Caminar":[{run:true,n:"Caminata",sr:"25–35 min",rir:"Cómoda a moderada"}],
+"Viernes · Fuerza A":[],
+"Sábado · Correr":[{run:true,n:"Carrera / caminata",sr:"30–40 min",rir:"Ritmo conversacional"}],
+"Domingo · Descanso":[{run:true,n:"Recuperación",sr:"Descanso",rir:"Sueño + movilidad suave opcional"}]
+};
+days["Miércoles · Fuerza B"]=[
+ {...days["Lunes · Fuerza A"][0],n:"Sentadilla con pausa",sr:"3 × 8–12",alt:"Sentadilla a silla con pausa de 1 s."},
+ {...days["Lunes · Fuerza A"][1]},
+ {...days["Lunes · Fuerza A"][2]},
+ {n:"Zancada asistida",sr:"2–3 × 8–10 / pierna",rir:"RIR 2–3",c:["Apóyate ligeramente si necesitas equilibrio.","Da un paso suficientemente largo para mantener estabilidad.","Desciende ambas rodillas con control.","Rodilla delantera sigue la dirección del pie.","Empuja el suelo para volver sin balancearte."],e:["Paso demasiado corto → alárgalo.","Rodilla cae hacia dentro → alinéala.","Perder equilibrio → usa apoyo estable."],alt:"Split squat asistido.",v:"https://www.youtube.com/results?search_query=assisted+reverse+lunge+proper+form"},
+ {...days["Lunes · Fuerza A"][3],n:"Puente de glúteos unilateral o normal",sr:"3 × 8–12"}
+];
+days["Viernes · Fuerza A"]=days["Lunes · Fuerza A"].map(x=>({...x}));
+
+const runWeeks=[
+"Semana 1: 5 min caminar + 1 min trote / 2 min caminata × 8 + 5 min caminar.",
+"Semana 2: 5 min caminar + 90 s trote / 2 min caminata × 8 + 5 min caminar.",
+"Semana 3: 5 min caminar + 2 min trote / 2 min caminata × 7 + 5 min caminar.",
+"Semana 4: 5 min caminar + 3 min trote / 2 min caminata × 6 + 5 min caminar."
+];
+let active=localStorage.tonoDay || Object.keys(days)[0];
+let state=JSON.parse(localStorage.tonoState||"{}");
+let timerInt=null, secs=120;
+function key(i){return active+"|"+i}
+function save(){localStorage.tonoState=JSON.stringify(state);localStorage.tonoDay=active}
+function renderTabs(){tabs.innerHTML="";Object.keys(days).forEach(d=>{let b=document.createElement("button");b.textContent=d;b.className=d===active?"active":"";b.onclick=()=>{active=d;save();render()};tabs.appendChild(b)})}
+function render(){
+ renderTabs(); const q=search.value.toLowerCase(); content.innerHTML="";
+ days[active].forEach((x,i)=>{
+  if(q && !x.n.toLowerCase().includes(q)) return;
+  const k=key(i), st=state[k]||{done:false,sets:{}};
+  let div=document.createElement("div");div.className="card"+(st.done?" done":"");
+  if(x.run){
+    let extra=x.n.includes("Carrera")?`<div class="runbox"><b>Progresión de 4 semanas</b><ul>${runWeeks.map(a=>"<li>"+a+"</li>").join("")}</ul><div class="note">Debe poder decir frases cortas. Si hay dolor articular, sustituye el trote por caminata y no aumentes impacto.</div></div>`:"";
+    div.innerHTML=`<div class="top"><div><h2>${x.n}</h2><div class="meta">${x.sr} · ${x.rir}</div></div><span class="badge">${active.split(" · ")[1]}</span></div>${extra}<div class="actions"><button class="btn ${st.done?'btn-green':'btn-main'}" onclick="toggleDone(${i})">${st.done?'✓ Completado':'Marcar completado'}</button></div>`;
+  } else {
+    let sets=3, m=x.sr.match(/^(\d)/); if(m) sets=+m[1];
+    let rows=""; for(let s=1;s<=sets;s++){let a=(st.sets&&st.sets[s])||{};rows+=`<div class="setrow"><b>${s}</b><input placeholder="reps" value="${a.r||''}" oninput="setVal(${i},${s},'r',this.value)"><input placeholder="RIR" value="${a.i||''}" oninput="setVal(${i},${s},'i',this.value)"><input placeholder="nota/peso" value="${a.w||''}" oninput="setVal(${i},${s},'w',this.value)"></div>`}
+    div.innerHTML=`<div class="top"><div><h2>${x.n}</h2><div class="meta">${x.sr} · ${x.rir}</div></div><span class="badge">Fuerza</span></div>
+    <div class="grid"><div class="box"><h3>5 claves de técnica</h3><ol>${x.c.map(a=>"<li>"+a+"</li>").join("")}</ol></div><div class="box"><h3>3 errores y cómo corregirlos</h3><ol>${x.e.map(a=>"<li>"+a+"</li>").join("")}</ol></div></div>
+    <div class="box" style="margin-top:10px"><h3>Alternativa</h3><div class="note">${x.alt}</div></div>
+    <div class="sets"><div class="setrow"><span></span><label>Reps</label><label>RIR</label><label>Nota/peso</label></div>${rows}</div>
+    <div class="actions"><a class="btn btn-soft" href="${x.v}" target="_blank" rel="noopener">▶ Ver técnica</a><button class="btn btn-soft" onclick="startTimer()">⏱ 2 min</button><button class="btn ${st.done?'btn-green':'btn-main'}" onclick="toggleDone(${i})">${st.done?'✓ Completado':'Completar ejercicio'}</button></div>
+    <p class="note"><b>Progresión:</b> cuando completes el máximo del rango en todas las series con buena técnica y RIR objetivo, avanza a una variante un poco más difícil o añade resistencia moderada.</p>`;
+  }
+  content.appendChild(div);
+ });
+ updateProgress();
+}
+function setVal(i,s,f,v){let k=key(i);state[k]=state[k]||{done:false,sets:{}};state[k].sets=state[k].sets||{};state[k].sets[s]=state[k].sets[s]||{};state[k].sets[s][f]=v;save()}
+function toggleDone(i){let k=key(i);state[k]=state[k]||{done:false,sets:{}};state[k].done=!state[k].done;save();render()}
+function updateProgress(){let arr=days[active],done=arr.filter((_,i)=>(state[key(i)]||{}).done).length,p=arr.length?Math.round(done/arr.length*100):0;progressText.textContent=`${done} de ${arr.length} ejercicios`;pct.textContent=p+"%";bar.style.width=p+"%"}
+function resetDay(){if(confirm("¿Reiniciar el progreso de este día?")){days[active].forEach((_,i)=>delete state[key(i)]);save();render()}}
+function startTimer(){clearInterval(timerInt);secs=120;showClock();timerInt=setInterval(()=>{secs--;showClock();if(secs<=0){clearInterval(timerInt);if(navigator.vibrate)navigator.vibrate([200,100,200]);}},1000)}
+function showClock(){clock.textContent=String(Math.floor(secs/60)).padStart(2,"0")+":"+String(secs%60).padStart(2,"0")}
+
+const checks=[
+ ["protein","Llegué aproximadamente a 120–130 g de proteína"],
+ ["fruit","Comí 2 porciones de fruta"],
+ ["fiber","Incluí verduras, frijoles, avena u otra fuente de fibra"],
+ ["drinks","Elegí principalmente agua/bebidas sin azúcar"]
+];
+function showSection(which,btn){
+ ["train","body","nutrition","records"].forEach(s=>document.getElementById(s+"Section").style.display=s===which?"block":"none");
+ [...document.querySelectorAll("#mainTabs button")].forEach(x=>x.classList.remove("active"));btn.classList.add("active");
+ if(which==="body") renderMeasures(); if(which==="nutrition") renderNutrition(); if(which==="records") loadPR();
+}
+function addMeasure(){
+ let w=parseFloat(bodyWeight.value), c=parseFloat(waist.value), d=measureDate.value||new Date().toISOString().slice(0,10);
+ if(!w && !c){alert("Registra al menos peso o cintura.");return}
+ let arr=JSON.parse(localStorage.tonoMeasures||"[]");arr.push({d,w:w||null,c:c||null,a:activityDay.value});arr.sort((a,b)=>a.d.localeCompare(b.d));localStorage.tonoMeasures=JSON.stringify(arr);bodyWeight.value="";waist.value="";renderMeasures();
+}
+function renderMeasures(){
+ let arr=JSON.parse(localStorage.tonoMeasures||"[]");
+ if(!arr.length){measureHistory.innerHTML="Aún no hay mediciones. La referencia inicial es 84.0 kg.";bodySummary.innerHTML='<div class="stat"><b>84.0</b><span>kg iniciales</span></div><div class="stat"><b>—</b><span>cintura inicial</span></div>';return}
+ measureHistory.innerHTML='<div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><tr><th>Fecha</th><th>Peso</th><th>Cintura</th><th>Día</th><th></th></tr>'+arr.map((x,i)=>`<tr><td>${x.d}</td><td>${x.w??"—"} kg</td><td>${x.c??"—"} cm</td><td>${x.a}</td><td><button class="btn btn-soft" onclick="delMeasure(${i})">×</button></td></tr>`).join("")+"</table></div>";
+ let last=[...arr].reverse().find(x=>x.w), cw=last?last.w:null, delta=cw?(cw-84).toFixed(1):"—";
+ let cs=arr.find(x=>x.c), cl=[...arr].reverse().find(x=>x.c), cd=(cs&&cl)?(cl.c-cs.c).toFixed(1):"—";
+ bodySummary.innerHTML=`<div class="stat"><b>${cw??"—"}</b><span>peso actual kg</span></div><div class="stat"><b>${delta}</b><span>cambio kg</span></div><div class="stat"><b>${cl?cl.c:"—"}</b><span>cintura actual cm</span></div><div class="stat"><b>${cd}</b><span>cambio cintura cm</span></div>`;
+}
+function delMeasure(i){let arr=JSON.parse(localStorage.tonoMeasures||"[]");arr.splice(i,1);localStorage.tonoMeasures=JSON.stringify(arr);renderMeasures()}
+function todayKey(){return "tonoFood_"+new Date().toISOString().slice(0,10)}
+function renderNutrition(){
+ let s=JSON.parse(localStorage.getItem(todayKey())||'{"h":5}');
+ foodChecks.innerHTML=checks.map(([k,t])=>`<label class="box" style="display:block;margin:7px 0"><input type="checkbox" ${s[k]?"checked":""} onchange="toggleFood('${k}',this.checked)"> ${t}</label>`).join("");
+ hunger.value=s.h||5;hungerVal.textContent=hunger.value;
+}
+function toggleFood(k,v){let s=JSON.parse(localStorage.getItem(todayKey())||'{"h":5}');s[k]=v;localStorage.setItem(todayKey(),JSON.stringify(s))}
+function saveNutrition(){let s=JSON.parse(localStorage.getItem(todayKey())||'{}');s.h=+hunger.value;localStorage.setItem(todayKey(),JSON.stringify(s));hungerVal.textContent=hunger.value}
+function savePR(){localStorage.tonoPR=JSON.stringify({push:prPush.value,squat:prSquat.value,run:prRun.value,km:prKm.value})}
+function loadPR(){let p=JSON.parse(localStorage.tonoPR||"{}");prPush.value=p.push||"";prSquat.value=p.squat||"";prRun.value=p.run||"";prKm.value=p.km||""}
+measureDate.value=new Date().toISOString().slice(0,10);
+
+search.addEventListener("input",render); render();
+</script>
+</body></html>

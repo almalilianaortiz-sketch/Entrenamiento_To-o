@@ -1,0 +1,1 @@
+{"name":"entrenamiento-tono","private":true,"scripts":{"test":"node tests/functional.cjs","test:browser":"node tests/smoke.cjs"},"devDependencies":{"jsdom":"30.1.2","playwright":"1.62.1"}}
